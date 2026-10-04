@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>EnhancedOrders</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <GameDir Condition="'$(GameDir)' == ''">$(HOME)/.steam/debian-installation/steamapps/common/Ostranauts</GameDir>
+    <Managed>$(GameDir)/Ostranauts_Data/Managed</Managed>
+    <BepInExCore Condition="'$(BepInExCore)' == ''">$(GameDir)/BepInEx/core</BepInExCore>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="$(BepInExCore)/BepInEx.dll" Private="false" />
+    <Reference Include="$(BepInExCore)/0Harmony.dll" Private="false" />
+    <Reference Include="$(Managed)/Assembly-CSharp.dll" Private="false" />
+    <Reference Include="$(Managed)/UnityEngine.dll" Private="false" />
+    <Reference Include="$(Managed)/UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(Managed)/UnityEngine.IMGUIModule.dll" Private="false" />
+    <Reference Include="$(Managed)/UnityEngine.InputLegacyModule.dll" Private="false" />
+    <Reference Include="$(Managed)/UnityEngine.UI.dll" Private="false" />
+    <Reference Include="$(Managed)/UnityEngine.UIModule.dll" Private="false" />
+    <Reference Include="$(Managed)/UnityEngine.TextRenderingModule.dll" Private="false" />
+    <Reference Include="$(Managed)/Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="$(Managed)/netstandard.dll" Private="false" />
+  </ItemGroup>
+  <Target Name="Deploy" AfterTargets="Build" Condition="Exists('$(GameDir)/BepInEx/plugins')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)/BepInEx/plugins" />
+  </Target>
+</Project>
