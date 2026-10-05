@@ -8,10 +8,11 @@ using UnityEngine;
 
 namespace EnhancedOrders
 {
-    [BepInPlugin(Guid, "Enhanced Orders", "1.0.0")]
+    [BepInPlugin(Guid, "Enhanced Orders", Version)]
     public class Plugin : BaseUnityPlugin
     {
         public const string Guid = "natakou.ostranauts.enhancedorders";
+        public const string Version = "1.0.0";
         private const int WindowId = 0x454e4f52; // "ENOR"
 
         internal static ConfigEntry<int> MaxCondition;
@@ -53,8 +54,21 @@ namespace EnhancedOrders
             foreach (OrderPicker p in OrderPicker.All) p.BindPresets(Config);
             if (old.Count > 0) Logger.LogInfo($"Imported {old.Count} setting(s) from the old separate mods.");
 
-            new Harmony(Guid).PatchAll();
-            Logger.LogInfo("Enhanced Orders loaded");
+            // Patch class by class so a game update that breaks one patch doesn't take down the rest.
+            var harmony = new Harmony(Guid);
+            int failed = 0;
+            foreach (Type t in AccessTools.GetTypesFromAssembly(typeof(Plugin).Assembly))
+            {
+                if (!t.IsDefined(typeof(HarmonyPatch), false)) continue;
+                try { harmony.CreateClassProcessor(t).Patch(); }
+                catch (Exception e)
+                {
+                    failed++;
+                    Logger.LogError($"Patch {t.Name} failed (game update?), that feature is off: {e.Message}");
+                }
+            }
+            Logger.LogInfo(failed == 0 ? $"Enhanced Orders {Version} loaded"
+                : $"Enhanced Orders {Version} loaded with {failed} failed patch(es)");
         }
 
         private static void ReadOld(string file, Dictionary<string, int> into)

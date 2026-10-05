@@ -1,0 +1,42 @@
+[h1]Enhanced Orders[/h1]
+[b]Requires BepInEx 5 and the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3741030124]BepInEx Mod Loader[/url].[/b] This is a code mod; the game can't load it on its own. See Install below.
+
+Pick-and-confirm filters for the PDA [b]Uninstall[/b], [b]Repair[/b] and [b]Haul[/b] orders. Uninstall one floor tile without the wall, conduit and equipment on the same tile; haul just the ore out of a mixed pile; repair only what's actually worn.
+
+[h2]How it works[/h2]
+Open PDA → Orders → UNIN, REPR or HAUL. A panel appears under the job filter checkboxes:
+[olist]
+[*][b]Pick area[/b]: tick it, then click a tile or drag a box on the ship. Nothing is queued. The panel lists every object type in that area with counts, grouped like the install menu (HULL, HVAC, POWR, SENS, CTRL, FURN, APPS, MISC, and OTHER for things you can't build).
+[*]Tick the types you want. A group's checkbox ticks the whole group.
+[*][b]UNINSTALL / REPAIR / HAUL N SELECTED[/b] queues just those objects. [b]CANCEL[/b] drops the pick.
+[/olist]
+With Pick area off, the orders work exactly as in the base game.
+
+[h2]Saved selections[/h2]
+Each order has three preset slots next to Pick area. [b]+ SAVE[/b] stores your current ticks; click a saved slot to load it (the next pick comes up pre-ticked); right-click a slot to clear it.
+
+[h2]Repair thresholds[/h2]
+The Repair panel has two sliders:
+[list]
+[*][b]Repair only below X%[/b]: Repair (picked or painted) skips items at or above this condition, so a drag over a room doesn't queue parts at 98%. 100 = vanilla.
+[*][b]Stop restoring at X%[/b]: restore work ends at this condition instead of 100%, and crew won't auto-restore items already above it. 100 = vanilla.
+[/list]
+Condition % is the number the item tooltip shows.
+
+[h2]Install[/h2]
+[olist]
+[*]Install [url=https://github.com/BepInEx/BepInEx/releases]BepInEx 5.4.23.x (win_x64)[/url] into the Ostranauts folder (the one with Ostranauts.exe). On Linux/Steam Deck (Proton) also set the launch option: [code]WINEDLLOVERRIDES="winhttp=n,b" %command%[/code]
+[*]Subscribe to the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3741030124]BepInEx Mod Loader[/url] and do its one-time setup.
+[*]Subscribe to this mod, enable it in Main Menu → MODS, and restart the game.
+[/olist]
+
+[h2]Settings[/h2]
+[code]BepInEx/config/natakou.ostranauts.enhancedorders.cfg[/code]: repair thresholds, panel FontSize (default 20), and saved presets. Works with BepInEx Configuration Manager.
+
+[h2]Compatibility[/h2]
+[list]
+[*]Built for Ostranauts 1.0.1.5. If a game update breaks part of it, the rest keeps working and the BepInEx log says which feature is off.
+[*]Patches CrewSim.PaintOrder / PaintBounds / PaintPos, Interaction.TriggeredInternal and CondOwner.InsertUndamage. Other mods that change how Uninstall, Repair or Haul painting works may conflict.
+[*]Replaces the earlier separate "Uninstall Picker" and "Repair Threshold" plugins; remove those if you had them. Settings are imported on first run.
+[*]Safe to add or remove mid-save: it doesn't add anything to save files.
+[/list]

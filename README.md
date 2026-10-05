@@ -49,3 +49,27 @@ Needs BepInEx 5 (win x64) in the game folder and, on Linux/Proton, the Steam lau
 
 Override the game path with `-p:GameDir=...` (BepInEx references come from `<game>/BepInEx/core`,
 or set `-p:BepInExCore=...`).
+
+## Publishing to the Steam Workshop
+Ostranauts doesn't load DLLs itself. Workshop players need BepInEx plus the
+[BepInEx Mod Loader](https://steamcommunity.com/sharedfiles/filedetails/?id=3741030124),
+which copies `<item>/BepInEx/plugins/*` from enabled Workshop items into the game's
+`BepInEx/plugins/Workshop/<id>/`.
+
+    ./package.sh           # build + assemble dist/EnhancedOrders/
+    ./package.sh --stage   # + copy into Ostranauts_Data/Mods/, add "EnhancedOrders|edit" to loading_order.json
+
+Then in game: Main Menu → MODS → Enhanced Orders → **UPLOAD** (needs the Steam overlay and the
+Workshop agreement accepted). The first upload creates the item, using
+`workshop/description.bbcode` as its description; the game writes the new `strWorkshopID` into
+the staged `mod_info.json`, and the next `./package.sh` copies it into `workshop/mod_info.json`;
+commit that so later uploads update the same item. Later uploads don't touch the description;
+edit it on the Steam page. After the first upload, add the BepInEx Mod Loader as a
+*Required item* on the Workshop page.
+
+- Version: `Plugin.Version` in `Plugin.cs` (goes into `strModVersion`). Bump `strGameVersion` in
+  `workshop/mod_info.json` when rebuilding for a game update.
+- `workshop/preview.png` (< 1 MB) is a generated title card (`workshop/make_preview.py`);
+  replace it with an in-game screenshot when you have one.
+- If you subscribe to your own item, remove the dev build from `BepInEx/plugins/` (the
+  `dotnet build` deploy) so only one copy loads.
