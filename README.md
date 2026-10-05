@@ -73,3 +73,6 @@ edit it on the Steam page. After the first upload, add the BepInEx Mod Loader as
   replace it with an in-game screenshot when you have one.
 - If you subscribe to your own item, remove the dev build from `BepInEx/plugins/` (the
   `dotnet build` deploy) so only one copy loads.
+
+## License
+MIT, see [LICENSE](LICENSE).

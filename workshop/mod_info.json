@@ -2,7 +2,7 @@
   {
     "strName": "Enhanced Orders",
     "strAuthor": "natakou",
-    "strModURL": "",
+    "strModURL": "https://github.com/lukaszzalewski/ostranauts-enhanced-orders",
     "strGameVersion": "1.0.1.5",
     "aTags": [
       "Fix/QoL"
