@@ -9,7 +9,7 @@ namespace EnhancedOrders
 {
     // Order panels built into the PDA Orders panel, in the empty space below the job filter
     // checkboxes (pnlJobs: types 0.8-0.95, filters 0.55-0.75, nothing below in order mode).
-    // One panel per OrderPicker; only the active order's panel is shown.
+    // One panel per OrderPicker (Uninstall, Repair, Haul); only the active order's panel is shown.
     //
     // Checkboxes are clones of the game's own filter checkbox: a square whose Background
     // fills it, sized by pnlToggles' layout, with the label 50px below. Clones are kept
@@ -78,6 +78,7 @@ namespace EnhancedOrders
                     new SliderSpec(Plugin.MaxCondition, "Repair only below {0}%"),
                     new SliderSpec(Plugin.StopRestoreAt, "Stop restoring at {0}%"),
                 }));
+                _panels.Add(new Panel(jobs, OrderPicker.Haul, null));
 
                 _builtFor = pda;
                 Plugin.Log.LogInfo("Order panels added to the PDA Orders panel.");
@@ -91,6 +92,17 @@ namespace EnhancedOrders
                 _panels.Clear();
                 Failed = true;
                 return false;
+            }
+        }
+
+        // Button only reacts to the left mouse button; this adds a right-click action.
+        private class RightClick : MonoBehaviour, IPointerClickHandler
+        {
+            public System.Action Action;
+
+            public void OnPointerClick(PointerEventData e)
+            {
+                if (e.button == PointerEventData.InputButton.Right) Action?.Invoke();
             }
         }
 
@@ -126,6 +138,9 @@ namespace EnhancedOrders
             private readonly TMP_Text _confirmLabel;
             private readonly RectTransform _list;
             private readonly List<KeyValuePair<string, Toggle>> _rows = new List<KeyValuePair<string, Toggle>>();
+            private readonly List<KeyValuePair<string, Toggle>> _groupRows = new List<KeyValuePair<string, Toggle>>();
+            private readonly Button[] _presetButtons = new Button[OrderPicker.PresetSlots];
+            private readonly TMP_Text[] _presetLabels = new TMP_Text[OrderPicker.PresetSlots];
             private int _builtVersion = -1;
 
             public Panel(Transform jobs, OrderPicker picker, SliderSpec[] sliders)
@@ -151,8 +166,27 @@ namespace EnhancedOrders
                 float y = 0f;
                 _status = MakeLabel(rt, ref y);
                 foreach (SliderSpec s in _sliders) MakeSlider(rt, s, ref y);
-                _pick = MakeToggle(rt, "Pick objects from ship", ref y);
+                // Pick toggle and preset slots share a row. Click an empty slot to save the
+                // ticks, a filled one to load it; right-click clears a slot.
+                float pickTop = y;
+                _pick = MakeToggle(rt, "Pick area", ref y, 0f, 0.36f);
                 _pick.onValueChanged.AddListener(picker.SetPicking);
+                RectTransform presets = NewRow("pnlPresets", rt, ref pickTop);
+                for (int i = 0; i < OrderPicker.PresetSlots; i++)
+                {
+                    int slot = i;
+                    float w = 0.64f / OrderPicker.PresetSlots;
+                    Button b = MakeButton(presets, 0.36f + w * i + 0.01f, 0.36f + w * (i + 1) - 0.01f, () =>
+                    {
+                        if (picker.PresetName(slot) == null) picker.SavePreset(slot);
+                        else picker.LoadPreset(slot);
+                    }, out _presetLabels[i]);
+                    RectTransform br = (RectTransform)b.transform;
+                    br.offsetMin = new Vector2(0f, 3f);
+                    br.offsetMax = new Vector2(0f, -3f);
+                    b.gameObject.AddComponent<RightClick>().Action = () => picker.ClearPreset(slot);
+                    _presetButtons[i] = b;
+                }
 
                 // Confirm / Cancel sit at the bottom; the scrolling type list fills the space between.
                 float btnHeight = Mathf.Round(_rowHeight * 1.3f);
@@ -180,22 +214,40 @@ namespace EnhancedOrders
                 SetState(_pick, Picker.Picking);
                 bool hasPicks = Picker.Candidates.Count > 0;
                 if (_buttons.activeSelf != hasPicks) _buttons.SetActive(hasPicks);
-                _confirm.interactable = Picker.Selected.Count > 0;
+                _confirm.interactable = Picker.SelectedCount > 0;
                 _confirmLabel.text = Picker.ConfirmText;
+                for (int i = 0; i < OrderPicker.PresetSlots; i++)
+                {
+                    string name = Picker.PresetName(i);
+                    _presetLabels[i].text = name ?? "+ SAVE";
+                    _presetButtons[i].interactable = name != null || Picker.SelectedCount > 0;
+                }
                 foreach (var row in _rows)
                     SetState(row.Value, Picker.Selected.Contains(row.Key));
+                foreach (var row in _groupRows)
+                    SetState(row.Value, Picker.GroupTicked(row.Key));
             }
 
             private void RebuildList()
             {
                 foreach (Transform child in _list) Object.Destroy(child.gameObject);
                 _rows.Clear();
+                _groupRows.Clear();
 
                 float y = 0f;
+                string group = null;
                 foreach (OrderPicker.Entry e in Picker.Candidates)
                 {
+                    if (e.Group != group)
+                    {
+                        string g = group = e.Group;
+                        Toggle h = MakeToggle(_list, g, ref y);
+                        SetState(h, Picker.GroupTicked(g));
+                        h.onValueChanged.AddListener(on => Picker.ToggleGroup(g, on));
+                        _groupRows.Add(new KeyValuePair<string, Toggle>(g, h));
+                    }
                     string name = e.Name;
-                    Toggle t = MakeToggle(_list, $"{e.Label}  x{e.Count}", ref y);
+                    Toggle t = MakeToggle(_list, $"{e.Label}  x{e.Count}", ref y, _boxSize + 8f);
                     SetState(t, Picker.Selected.Contains(name));
                     t.onValueChanged.AddListener(on => Picker.Toggle(name, on));
                     _rows.Add(new KeyValuePair<string, Toggle>(name, t));
@@ -226,11 +278,14 @@ namespace EnhancedOrders
 
         // One row: the cloned checkbox as a square on the left, our own label to its right.
         // Clicking the label toggles too.
-        private static Toggle MakeToggle(RectTransform parent, string text, ref float y)
+        // indent shifts the row right; maxX limits the label to part of the width.
+        private static Toggle MakeToggle(RectTransform parent, string text, ref float y,
+            float indent = 0f, float maxX = 1f)
         {
             float top = y;
             TMP_Text label = MakeLabel(parent, ref y);
-            label.margin = new Vector4(_boxSize + 8f, 0f, 0f, 0f);
+            label.rectTransform.anchorMax = new Vector2(maxX, 1f);
+            label.margin = new Vector4(indent + _boxSize + 8f, 0f, 0f, 0f);
             label.text = text;
             label.raycastTarget = true;
 
@@ -247,7 +302,7 @@ namespace EnhancedOrders
             rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
             rt.pivot = new Vector2(0f, 0.5f);
             rt.sizeDelta = new Vector2(_boxSize, _boxSize);
-            rt.anchoredPosition = new Vector2(2f, top - _rowHeight / 2f);
+            rt.anchoredPosition = new Vector2(indent + 2f, top - _rowHeight / 2f);
 
             Button click = label.gameObject.AddComponent<Button>();
             click.transition = Selectable.Transition.None;

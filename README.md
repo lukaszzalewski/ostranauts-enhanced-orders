@@ -1,19 +1,30 @@
 # Ostranauts – Enhanced Orders
 
-BepInEx plugin that adds pick-and-confirm panels to PDA → Orders, below the job filter
-checkboxes. It replaces the separate *Uninstall Picker* and *Repair Threshold* mods (their
-settings are imported on first run; don't install them alongside this).
-
-## Uninstall (UNIN) and Repair (REPR)
-1. **Pick objects from ship**: tick it, then click a tile or drag a box. Nothing is queued;
-   the panel lists the object types in that area, with counts. Another click or drag
-   replaces the area.
-2. Tick the types you want.
-3. **UNINSTALL / REPAIR N SELECTED** queues just those objects in the picked area and returns
-   to normal. **Cancel** (or unticking Pick) drops the pick.
+BepInEx plugin that adds pick-and-confirm panels for the Uninstall, Repair and Haul
+orders to PDA → Orders, below the job filter checkboxes. It replaces the separate *Uninstall Picker* and *Repair Threshold* mods (their
+settings are imported on first ## Uninstall (UNIN), Repair (REPR) and Haul (HAUL)
+1. **Pick area**: tick it, then click a tile or drag a box. Nothing is queued; the panel
+   lists the object types in that area with counts, grouped like the install menu (HULL,
+   HVAC, POWR, SENS, CTRL, FURN, APPS, MISC; anything not buildable is under OTHER).
+   Another click or drag replaces the area.
+2. Tick the types you want. A group's checkbox ticks or unticks everything in it.
+3. **UNINSTALL / REPAIR / HAUL N SELECTED** queues just those objects in the picked area and
+   returns to normal. **Cancel** (or unticking Pick area) drops the pick.
 
 With Pick off, the orders paint as usual (PDA filter checkboxes apply). A pick is dropped
 when its order is closed. Types are matched by exact object ID, so damaged variants show
+up as separate entries.
+
+### Saved selections
+Each order has three preset slots next to Pick area:
+- **+ SAVE** (empty slot) saves the current ticks; the slot is named after the first type.
+- Click a saved slot to load it: its types are ticked and Pick area turns on, so the next
+  pick comes up pre-ticked.
+- Right-click a saved slot to clear it.
+
+Presets are stored in the config under `[Presets]`.
+
+ed variants show
 up as separate entries.
 
 ## Repair thresholds

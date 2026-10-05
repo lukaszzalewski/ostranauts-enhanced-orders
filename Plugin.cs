@@ -50,6 +50,7 @@ namespace EnhancedOrders
                 new ConfigDescription("Text size of the order panels in the PDA. Rows scale with it. " +
                                       "Takes effect the next time the PDA is built (load a save).",
                     new AcceptableValueRange<int>(10, 40)));
+            foreach (OrderPicker p in OrderPicker.All) p.BindPresets(Config);
             if (old.Count > 0) Logger.LogInfo($"Imported {old.Count} setting(s) from the old separate mods.");
 
             new Harmony(Guid).PatchAll();
@@ -105,18 +106,43 @@ namespace EnhancedOrders
                 PercentRow($"Stop restoring at {StopRestoreAt.Value}%", StopRestoreAt);
             }
 
-            bool pick = GUILayout.Toggle(p.Picking, "Pick objects from ship");
+            GUILayout.BeginHorizontal();
+            bool pick = GUILayout.Toggle(p.Picking, "Pick area", GUILayout.Width(90f));
             if (pick != p.Picking) p.SetPicking(pick);
+            for (int i = 0; i < OrderPicker.PresetSlots; i++)
+            {
+                string name = p.PresetName(i);
+                if (name == null)
+                {
+                    GUI.enabled = p.SelectedCount > 0;
+                    if (GUILayout.Button("+ save")) p.SavePreset(i);
+                    GUI.enabled = true;
+                }
+                else if (GUILayout.Button(name))
+                {
+                    // Right-click clears the slot, left-click loads it.
+                    if (Event.current.button == 1) p.ClearPreset(i);
+                    else p.LoadPreset(i);
+                }
+            }
+            GUILayout.EndHorizontal();
 
+            string group = null;
             foreach (OrderPicker.Entry e in p.Candidates)
             {
+                if (e.Group != group)
+                {
+                    group = e.Group;
+                    bool all = p.GroupTicked(group);
+                    if (GUILayout.Toggle(all, group) != all) p.ToggleGroup(group, !all);
+                }
                 bool on = p.Selected.Contains(e.Name);
-                if (GUILayout.Toggle(on, $"{e.Label}  x{e.Count}") != on) p.Toggle(e.Name, !on);
+                if (GUILayout.Toggle(on, $"    {e.Label}  x{e.Count}") != on) p.Toggle(e.Name, !on);
             }
 
             if (p.Candidates.Count == 0) return;
             GUILayout.BeginHorizontal();
-            GUI.enabled = p.Selected.Count > 0;
+            GUI.enabled = p.SelectedCount > 0;
             if (GUILayout.Button(p.ConfirmText)) p.Confirm();
             GUI.enabled = true;
             if (GUILayout.Button("Cancel")) p.SetPicking(false);
