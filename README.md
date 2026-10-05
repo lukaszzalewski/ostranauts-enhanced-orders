@@ -74,5 +74,8 @@ edit it on the Steam page. After the first upload, add the BepInEx Mod Loader as
 - If you subscribe to your own item, remove the dev build from `BepInEx/plugins/` (the
   `dotnet build` deploy) so only one copy loads.
 
+## Support
+Free, and every feature stays free. Optional tip jar: [Ko-fi](https://ko-fi.com/lukaszalewski).
+
 ## License
 MIT, see [LICENSE](LICENSE).
