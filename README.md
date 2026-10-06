@@ -3,9 +3,13 @@
 BepInEx plugin that adds pick-and-confirm panels for the Uninstall, Repair and Haul
 orders to PDA → Orders, below the job filter checkboxes.
 
-**Steam Workshop:** https://steamcommunity.com/sharedfiles/filedetails/?id=3814248452 (needs BepInEx 5 and the
-[BepInEx Mod Loader](https://steamcommunity.com/sharedfiles/filedetails/?id=3741030124)). It replaces the separate *Uninstall Picker* and *Repair Threshold* mods (their
-settings are imported on first ## Uninstall (UNIN), Repair (REPR) and Haul (HAUL)
+**Steam Workshop:** https://steamcommunity.com/sharedfiles/filedetails/?id=3814248452
+(needs BepInEx 5 and the [BepInEx Mod Loader](https://steamcommunity.com/sharedfiles/filedetails/?id=3741030124)).
+
+It replaces the separate *Uninstall Picker* and *Repair Threshold* mods (their settings are
+imported on first run; don't install them alongside this).
+
+## Uninstall (UNIN), Repair (REPR) and Haul (HAUL)
 1. **Pick area**: tick it, then click a tile or drag a box. Nothing is queued; the panel
    lists the object types in that area with counts, grouped like the install menu (HULL,
    HVAC, POWR, SENS, CTRL, FURN, APPS, MISC; anything not buildable is under OTHER).
@@ -26,9 +30,6 @@ Each order has three preset slots next to Pick area:
 - Right-click a saved slot to clear it.
 
 Presets are stored in the config under `[Presets]`.
-
-ed variants show
-up as separate entries.
 
 ## Repair thresholds
 The Repair panel also has two sliders:
