@@ -1,7 +1,10 @@
 # Ostranauts – Enhanced Orders
 
 BepInEx plugin that adds pick-and-confirm panels for the Uninstall, Repair and Haul
-orders to PDA → Orders, below the job filter checkboxes. It replaces the separate *Uninstall Picker* and *Repair Threshold* mods (their
+orders to PDA → Orders, below the job filter checkboxes.
+
+**Steam Workshop:** https://steamcommunity.com/sharedfiles/filedetails/?id=3814248452 (needs BepInEx 5 and the
+[BepInEx Mod Loader](https://steamcommunity.com/sharedfiles/filedetails/?id=3741030124)). It replaces the separate *Uninstall Picker* and *Repair Threshold* mods (their
 settings are imported on first ## Uninstall (UNIN), Repair (REPR) and Haul (HAUL)
 1. **Pick area**: tick it, then click a tile or drag a box. Nothing is queued; the panel
    lists the object types in that area with counts, grouped like the install menu (HULL,
